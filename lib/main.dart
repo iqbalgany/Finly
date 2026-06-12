@@ -1,4 +1,4 @@
-import 'package:finly/main_page.dart';
+import 'package:finly/presentations/pages/main_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -14,8 +14,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        iconButtonTheme: IconButtonThemeData(
+          style: ButtonStyle(iconColor: WidgetStatePropertyAll(Colors.orange)),
+        ),
         textTheme: GoogleFonts.montserratTextTheme(),
         scaffoldBackgroundColor: Colors.white,
+        appBarTheme: AppBarTheme(backgroundColor: Colors.white),
       ),
       home: MainPage(),
     );
