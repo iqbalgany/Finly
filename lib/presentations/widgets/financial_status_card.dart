@@ -31,7 +31,6 @@ class FinancialStatusCard extends StatelessWidget {
           children: [
             Text(title, style: TextStyle(color: Colors.white, fontSize: 12)),
             SizedBox(height: 5),
-
             Text(amount, style: TextStyle(color: Colors.white)),
           ],
         ),
