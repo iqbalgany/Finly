@@ -5,17 +5,20 @@ class CustomTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final TextEditingController? controller;
   final VoidCallback? onTap;
+  final bool readOnly;
   const CustomTextField({
     super.key,
     this.labelText,
     this.keyboardType,
     this.controller,
+    this.readOnly = false,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      readOnly: readOnly,
       controller: controller,
       keyboardType: keyboardType,
       onTap: onTap,

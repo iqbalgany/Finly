@@ -85,8 +85,8 @@ class _TransactionPageState extends State<TransactionPage> {
             DropdownMenu<String>(
               controller: _category,
               hintText: 'Category',
-              requestFocusOnTap: true,
-              enableSearch: true,
+              requestFocusOnTap: false,
+              enableSearch: false,
               width: MediaQuery.sizeOf(context).width - 40,
               inputDecorationTheme: InputDecorationTheme(
                 filled: true,
@@ -122,6 +122,7 @@ class _TransactionPageState extends State<TransactionPage> {
             SizedBox(height: 20),
 
             CustomTextField(
+              readOnly: true,
               labelText: 'Enter Date',
               keyboardType: TextInputType.datetime,
               controller: _date,
