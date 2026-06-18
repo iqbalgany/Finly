@@ -1,5 +1,6 @@
 import 'package:finly/core/injection_container.dart';
-import 'package:finly/presentations/cubits/category/category_cubit.dart';
+import 'package:finly/domain/entities/category/category_entity.dart';
+import 'package:finly/presentation/cubits/category/category_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
@@ -37,7 +38,7 @@ class _CategoryPageState extends State<CategoryPage> {
             );
           }
         },
-        builder: (context, state) {
+        builder: (pageContext, state) {
           return Scaffold(
             appBar: AppBar(
               title: Text('Categories', style: TextStyle(fontSize: 20)),
@@ -70,27 +71,34 @@ class _CategoryPageState extends State<CategoryPage> {
 
                         IconButton(
                           onPressed: () {
-                            insertCategoryDialog(context);
+                            insertCategoryDialog(pageContext);
                           },
                           icon: Icon(Icons.add),
                         ),
                       ],
                     ),
                     SizedBox(height: 30),
-                    if (state is CategoryLoading &&
-                        state is! CategorySuccess) ...[
-                      Shimmer.fromColors(
-                        baseColor: Colors.grey[300]!,
-                        highlightColor: Colors.grey[100]!,
-                        child: Card(
-                          shape: RoundedRectangleBorder(
-                            side: BorderSide(color: Colors.black12),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: ListTile(
-                            onTap: () {},
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
+                    if (state is CategoryLoading) ...[
+                      Expanded(
+                        child: Shimmer.fromColors(
+                          baseColor: Colors.grey[300]!,
+                          highlightColor: Colors.grey[100]!,
+                          child: ListView.builder(
+                            itemCount: 3,
+                            itemBuilder: (_, _) => Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 5),
+                              child: Card(
+                                shape: RoundedRectangleBorder(
+                                  side: BorderSide(color: Colors.black12),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: ListTile(
+                                  onTap: () {},
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -131,9 +139,10 @@ class _CategoryPageState extends State<CategoryPage> {
                                         children: [
                                           IconButton(
                                             onPressed: () {
-                                              context
-                                                  .read<CategoryCubit>()
-                                                  .deleteCategory(category.id!);
+                                              showDeleteDialog(
+                                                pageContext,
+                                                category,
+                                              );
                                             },
                                             icon: Icon(Icons.delete),
                                           ),
@@ -141,7 +150,7 @@ class _CategoryPageState extends State<CategoryPage> {
 
                                           IconButton(
                                             onPressed: () {
-                                              context
+                                              pageContext
                                                   .read<CategoryCubit>()
                                                   .updateCategory(category);
                                             },
@@ -184,6 +193,65 @@ class _CategoryPageState extends State<CategoryPage> {
           );
         },
       ),
+    );
+  }
+
+  Future<dynamic> showDeleteDialog(
+    BuildContext pageContext,
+    CategoryEntity category,
+  ) {
+    return showDialog(
+      context: pageContext,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return AlertDialog(
+          icon: Container(
+            padding: EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              color: Colors.red.shade50,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.error_outline, color: Colors.red, size: 28),
+          ),
+          title: Text(
+            'Delete Category',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
+          content: Text(
+            'Are you sure you want to delete that category?',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 16, color: Colors.black87),
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            TextButton(
+              style: TextButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: BorderSide(color: Colors.red),
+                ),
+              ),
+              onPressed: () {
+                Navigator.pop(dialogContext);
+              },
+              child: Text('Cancel', style: TextStyle(color: Colors.red)),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.red,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                pageContext.read<CategoryCubit>().deleteCategory(category.id!);
+              },
+              child: Text('Delete', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
     );
   }
 

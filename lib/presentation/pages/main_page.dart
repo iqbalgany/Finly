@@ -1,7 +1,7 @@
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
-import 'package:finly/presentations/pages/category_page.dart';
-import 'package:finly/presentations/pages/home_page.dart';
-import 'package:finly/presentations/pages/transaction_page.dart';
+import 'package:finly/presentation/pages/category_page.dart';
+import 'package:finly/presentation/pages/home_page.dart';
+import 'package:finly/presentation/pages/transaction_page.dart';
 import 'package:flutter/material.dart';
 
 class MainPage extends StatefulWidget {

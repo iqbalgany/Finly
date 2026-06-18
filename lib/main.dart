@@ -1,5 +1,5 @@
 import 'package:finly/core/injection_container.dart';
-import 'package:finly/presentations/pages/main_page.dart';
+import 'package:finly/presentation/pages/main_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 

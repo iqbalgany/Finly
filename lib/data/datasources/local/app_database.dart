@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
-import 'package:finly/data/models/category/category.dart';
-import 'package:finly/data/models/transaction.dart';
+import 'package:finly/data/datasources/local/tables/category/category.dart';
+import 'package:finly/data/datasources/local/tables/transaction/transaction.dart';
 
 part 'app_database.g.dart';
 

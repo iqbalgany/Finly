@@ -3,7 +3,7 @@ import 'package:finly/domain/usecases/category/delete_category.dart';
 import 'package:finly/domain/usecases/category/get_categories.dart';
 import 'package:finly/domain/usecases/category/insert_category.dart';
 import 'package:finly/domain/usecases/category/update_category.dart';
-import 'package:finly/presentations/cubits/category/category_cubit.dart';
+import 'package:finly/presentation/cubits/category/category_cubit.dart';
 import 'package:get_it/get_it.dart';
 
 import '../data/repositories/category/category_repository_impl.dart';
