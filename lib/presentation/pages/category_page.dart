@@ -71,7 +71,10 @@ class _CategoryPageState extends State<CategoryPage> {
 
                         IconButton(
                           onPressed: () {
-                            insertCategoryDialog(pageContext);
+                            insertCategoryDialog(
+                              pageContext: pageContext,
+                              category: null,
+                            );
                           },
                           icon: Icon(Icons.add),
                         ),
@@ -150,6 +153,10 @@ class _CategoryPageState extends State<CategoryPage> {
 
                                           IconButton(
                                             onPressed: () {
+                                              insertCategoryDialog(
+                                                pageContext: pageContext,
+                                                category: category,
+                                              );
                                               pageContext
                                                   .read<CategoryCubit>()
                                                   .updateCategory(category);
@@ -255,21 +262,34 @@ class _CategoryPageState extends State<CategoryPage> {
     );
   }
 
-  Future<dynamic> insertCategoryDialog(BuildContext pageContext) {
-    _categoryController.clear();
+  Future<dynamic> insertCategoryDialog({
+    required BuildContext pageContext,
+    CategoryEntity? category,
+  }) {
+    final isEditMode = category != null;
+
+    if (isEditMode) {
+      _categoryController.text = category.name ?? '';
+    } else {
+      _categoryController.clear();
+    }
     return showDialog(
       context: pageContext,
       builder: (dialogContext) {
         return AlertDialog(
           backgroundColor: Colors.white,
           title: Text(
-            'Add ${_isSwitchOn ? 'Income' : 'Outcome'}',
+            isEditMode
+                ? 'Edit Category'
+                : 'Add ${_isSwitchOn ? 'Income' : 'Outcome'}',
             style: TextStyle(color: _isSwitchOn ? Colors.green : Colors.red),
           ),
           content: TextFormField(
             controller: _categoryController,
             decoration: InputDecoration(
-              hintText: 'Add a new category...',
+              hintText: isEditMode
+                  ? 'Rename Category'
+                  : 'Add a new category...',
               hintStyle: TextStyle(fontSize: 12),
               filled: true,
               fillColor: Colors.white,
@@ -295,10 +315,21 @@ class _CategoryPageState extends State<CategoryPage> {
               onPressed: () {
                 final text = _categoryController.text.trim();
                 if (text.isNotEmpty) {
-                  pageContext.read<CategoryCubit>().addCategory(
-                    text,
-                    _isSwitchOn == true ? 0 : 1,
-                  );
+                  if (isEditMode) {
+                    final updatedCategory = CategoryEntity(
+                      name: text,
+                      type: category.type,
+                      id: category.id,
+                    );
+                    pageContext.read<CategoryCubit>().updateCategory(
+                      updatedCategory,
+                    );
+                  } else {
+                    pageContext.read<CategoryCubit>().addCategory(
+                      text,
+                      _isSwitchOn == true ? 0 : 1,
+                    );
+                  }
                 }
                 Navigator.pop(dialogContext);
               },
