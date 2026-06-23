@@ -1,6 +1,12 @@
+import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
+import 'package:finly/domain/entities/category/category_entity.dart';
+import 'package:finly/domain/enums/category_type.dart';
+import 'package:finly/presentation/cubits/category/category_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
+import '../cubits/transaction/transaction_cubit.dart';
 import '../widgets/custom_text_field.dart';
 
 class TransactionPage extends StatefulWidget {
@@ -17,7 +23,8 @@ class _TransactionPageState extends State<TransactionPage> {
   final _category = TextEditingController();
   final _date = TextEditingController();
 
-  List<String> items = ['Makan dan Jajan', 'Transportasi', 'Nonton Film'];
+  CategoryEntity? _selectedCategory;
+  DateTime? _rawSelectedDate;
 
   Future<void> _selectDate(BuildContext context) async {
     DateTime? pickedDate = await showDatePicker(
@@ -27,12 +34,34 @@ class _TransactionPageState extends State<TransactionPage> {
     );
 
     if (pickedDate != null) {
+      _rawSelectedDate = pickedDate;
       String formattedDate = DateFormat('dd/MM/yyyy').format(pickedDate);
 
       setState(() {
         _date.text = formattedDate;
       });
     }
+  }
+
+  final CurrencyTextInputFormatter _amountFormatter =
+      CurrencyTextInputFormatter.currency(
+        locale: 'id',
+        symbol: 'Rp ',
+        decimalDigits: 0,
+      );
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<CategoryCubit>().getCategories();
+  }
+
+  @override
+  void dispose() {
+    _amount.dispose();
+    _category.dispose();
+    _date.dispose();
+    super.dispose();
   }
 
   @override
@@ -65,6 +94,8 @@ class _TransactionPageState extends State<TransactionPage> {
                   onChanged: (value) {
                     setState(() {
                       _isSwitchOn = value;
+                      _selectedCategory = null;
+                      _category.clear();
                     });
                   },
                 ),
@@ -82,42 +113,56 @@ class _TransactionPageState extends State<TransactionPage> {
             ),
             SizedBox(height: 20),
 
-            DropdownMenu<String>(
-              controller: _category,
-              hintText: 'Category',
-              requestFocusOnTap: false,
-              enableSearch: false,
-              width: MediaQuery.sizeOf(context).width - 40,
-              inputDecorationTheme: InputDecorationTheme(
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Colors.orange, width: 2),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Colors.orange, width: 2),
-                ),
-              ),
-              searchCallback:
-                  (List<DropdownMenuEntry<String>> entries, String query) {
-                    if (query.isEmpty) return null;
+            BlocBuilder<CategoryCubit, CategoryState>(
+              builder: (context, state) {
+                List<CategoryEntity> filteredItems = [];
 
-                    final int index = entries.indexWhere(
-                      (entry) => entry.label.toLowerCase().contains(
-                        query.toLowerCase(),
-                      ),
-                    );
+                if (state is CategorySuccess) {
+                  final targetType = _isSwitchOn
+                      ? CategoryType.income
+                      : CategoryType.outcome;
 
-                    return index != -1 ? index : null;
+                  filteredItems =
+                      state.categories
+                          ?.where((cat) => cat.type == targetType)
+                          .toList() ??
+                      [];
+                }
+                return DropdownMenu<CategoryEntity>(
+                  controller: _category,
+                  hintText: 'Category',
+                  requestFocusOnTap: false,
+                  enableSearch: false,
+                  width: MediaQuery.sizeOf(context).width - 40,
+                  inputDecorationTheme: InputDecorationTheme(
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Colors.orange, width: 2),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Colors.orange, width: 2),
+                    ),
+                  ),
+                  onSelected: (CategoryEntity? value) {
+                    setState(() {
+                      _selectedCategory = value;
+                    });
                   },
-              onSelected: (value) {},
-              dropdownMenuEntries: items.map<DropdownMenuEntry<String>>((
-                String value,
-              ) {
-                return DropdownMenuEntry<String>(value: value, label: value);
-              }).toList(),
+                  dropdownMenuEntries: filteredItems
+                      .map<DropdownMenuEntry<CategoryEntity>>((
+                        CategoryEntity cat,
+                      ) {
+                        return DropdownMenuEntry<CategoryEntity>(
+                          value: cat,
+                          label: cat.name!,
+                        );
+                      })
+                      .toList(),
+                );
+              },
             ),
             SizedBox(height: 20),
 
@@ -134,9 +179,28 @@ class _TransactionPageState extends State<TransactionPage> {
 
             ElevatedButton(
               onPressed: () {
-                _amount.clear();
-                _category.clear();
-                _date.clear();
+                if (_amount.text.isNotEmpty &&
+                    _rawSelectedDate != null &&
+                    _selectedCategory != null) {
+                  context.read<TransactionCubit>().addTransaction(
+                    category: _selectedCategory!,
+                    amount: int.parse(_amount.text.trim()),
+                    transactionDate: _rawSelectedDate!,
+                  );
+
+                  _amount.clear();
+                  _category.clear();
+                  _date.clear();
+
+                  Navigator.pop(context);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('All fields must be filled out!'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,

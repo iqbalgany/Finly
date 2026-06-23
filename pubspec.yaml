@@ -46,6 +46,7 @@ dependencies:
   equatable: ^2.0.8
   get_it: ^9.2.1
   shimmer: ^3.0.0
+  currency_text_input_formatter: ^2.3.0
   
 
 dev_dependencies:

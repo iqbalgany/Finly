@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:finly/domain/entities/category/category_entity.dart';
+import 'package:finly/domain/enums/category_type.dart';
 import 'package:finly/domain/usecases/category/delete_category.dart';
 import 'package:finly/domain/usecases/category/get_categories.dart';
 import 'package:finly/domain/usecases/category/insert_category.dart';
@@ -20,7 +21,7 @@ class CategoryCubit extends Cubit<CategoryState> {
     required this.updateCategoryUseCases,
   }) : super(CategoryInitial());
 
-  Future<void> addCategory(String name, int type) async {
+  Future<void> addCategory(String name, CategoryType type) async {
     emit(CategoryLoading());
     try {
       final newCategory = CategoryEntity(name: name, type: type);

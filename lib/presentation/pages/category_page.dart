@@ -1,5 +1,5 @@
-import 'package:finly/core/injection_container.dart';
 import 'package:finly/domain/entities/category/category_entity.dart';
+import 'package:finly/domain/enums/category_type.dart';
 import 'package:finly/presentation/cubits/category/category_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -25,181 +25,179 @@ class _CategoryPageState extends State<CategoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => getIt<CategoryCubit>()..getCategories(),
-      child: BlocConsumer<CategoryCubit, CategoryState>(
-        listener: (context, state) {
-          if (state is CategoryError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Failed to Add Category'),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        },
-        builder: (pageContext, state) {
-          return Scaffold(
-            appBar: AppBar(
-              title: Text('Categories', style: TextStyle(fontSize: 20)),
+    return BlocConsumer<CategoryCubit, CategoryState>(
+      listener: (context, state) {
+        if (state is CategoryError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to Add Category'),
+              backgroundColor: Colors.red,
             ),
-            body: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Switch(
-                          value: _isSwitchOn,
-                          onChanged: (value) {
-                            setState(() {
-                              _isSwitchOn = value;
-                            });
-                          },
-                          activeThumbColor: Colors.white,
-                          inactiveThumbColor: Colors.white,
-                          activeTrackColor: Colors.green,
-                          inactiveTrackColor: Colors.red,
-                          trackOutlineColor: WidgetStatePropertyAll(
-                            Colors.transparent,
-                          ),
+          );
+        }
+      },
+      builder: (pageContext, state) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text('Categories', style: TextStyle(fontSize: 20)),
+          ),
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Switch(
+                        value: _isSwitchOn,
+                        onChanged: (value) {
+                          setState(() {
+                            _isSwitchOn = value;
+                          });
+                        },
+                        activeThumbColor: Colors.white,
+                        inactiveThumbColor: Colors.white,
+                        activeTrackColor: Colors.green,
+                        inactiveTrackColor: Colors.red,
+                        trackOutlineColor: WidgetStatePropertyAll(
+                          Colors.transparent,
                         ),
-                        SizedBox(width: 10),
-                        Text(_isSwitchOn == true ? 'Income' : 'Outcome'),
-                        Spacer(),
+                      ),
+                      SizedBox(width: 10),
+                      Text(_isSwitchOn == true ? 'Income' : 'Outcome'),
+                      Spacer(),
 
-                        IconButton(
-                          onPressed: () {
-                            insertCategoryDialog(
-                              pageContext: pageContext,
-                              category: null,
-                            );
-                          },
-                          icon: Icon(Icons.add),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 30),
-                    if (state is CategoryLoading) ...[
-                      Expanded(
-                        child: Shimmer.fromColors(
-                          baseColor: Colors.grey[300]!,
-                          highlightColor: Colors.grey[100]!,
-                          child: ListView.builder(
-                            itemCount: 3,
-                            itemBuilder: (_, _) => Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 5),
-                              child: Card(
+                      IconButton(
+                        onPressed: () {
+                          insertCategoryDialog(
+                            pageContext: pageContext,
+                            category: null,
+                          );
+                        },
+                        icon: Icon(Icons.add),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 30),
+                  if (state is CategoryLoading) ...[
+                    Expanded(
+                      child: Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: ListView.builder(
+                          itemCount: 3,
+                          itemBuilder: (_, _) => Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 5),
+                            child: Card(
+                              shape: RoundedRectangleBorder(
+                                side: BorderSide(color: Colors.black12),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: ListTile(
+                                onTap: () {},
                                 shape: RoundedRectangleBorder(
-                                  side: BorderSide(color: Colors.black12),
                                   borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: ListTile(
-                                  onTap: () {},
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
                                 ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ] else if (state is CategorySuccess) ...[
-                      (() {
-                        final targetType = _isSwitchOn ? 0 : 1;
-                        final filteredCategories =
-                            state.categories
-                                ?.where((cat) => cat.type == targetType)
-                                .toList() ??
-                            [];
-                        if (filteredCategories.isNotEmpty) {
-                          return Expanded(
-                            child: ListView.builder(
-                              itemCount: filteredCategories.length,
-                              itemBuilder: (context, index) {
-                                final category = filteredCategories[index];
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 5,
+                    ),
+                  ] else if (state is CategorySuccess) ...[
+                    (() {
+                      final targetType = _isSwitchOn
+                          ? CategoryType.income
+                          : CategoryType.outcome;
+                      final filteredCategories =
+                          state.categories
+                              ?.where((cat) => cat.type == targetType)
+                              .toList() ??
+                          [];
+                      if (filteredCategories.isNotEmpty) {
+                        return Expanded(
+                          child: ListView.builder(
+                            itemCount: filteredCategories.length,
+                            itemBuilder: (context, index) {
+                              final category = filteredCategories[index];
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 5,
+                                ),
+                                child: Card(
+                                  shape: RoundedRectangleBorder(
+                                    side: BorderSide(color: Colors.black12),
+                                    borderRadius: BorderRadius.circular(20),
                                   ),
-                                  child: Card(
+                                  elevation: 10,
+                                  child: ListTile(
+                                    onTap: () {},
                                     shape: RoundedRectangleBorder(
-                                      side: BorderSide(color: Colors.black12),
                                       borderRadius: BorderRadius.circular(20),
                                     ),
-                                    elevation: 10,
-                                    child: ListTile(
-                                      onTap: () {},
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      tileColor: Colors.white,
-                                      title: Text(category.name ?? ''),
-                                      trailing: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          IconButton(
-                                            onPressed: () {
-                                              showDeleteDialog(
-                                                pageContext,
-                                                category,
-                                              );
-                                            },
-                                            icon: Icon(Icons.delete),
-                                          ),
-                                          SizedBox(width: 10),
+                                    tileColor: Colors.white,
+                                    title: Text(category.name ?? ''),
+                                    trailing: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        IconButton(
+                                          onPressed: () {
+                                            showDeleteDialog(
+                                              pageContext,
+                                              category,
+                                            );
+                                          },
+                                          icon: Icon(Icons.delete),
+                                        ),
+                                        SizedBox(width: 10),
 
-                                          IconButton(
-                                            onPressed: () {
-                                              insertCategoryDialog(
-                                                pageContext: pageContext,
-                                                category: category,
-                                              );
-                                              pageContext
-                                                  .read<CategoryCubit>()
-                                                  .updateCategory(category);
-                                            },
-                                            icon: Icon(Icons.edit),
-                                          ),
-                                        ],
+                                        IconButton(
+                                          onPressed: () {
+                                            insertCategoryDialog(
+                                              pageContext: pageContext,
+                                              category: category,
+                                            );
+                                            // pageContext
+                                            //     .read<CategoryCubit>()
+                                            //     .updateCategory(category);
+                                          },
+                                          icon: Icon(Icons.edit),
+                                        ),
+                                      ],
+                                    ),
+                                    leading: Container(
+                                      padding: EdgeInsets.all(5),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(8),
                                       ),
-                                      leading: Container(
-                                        padding: EdgeInsets.all(5),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                        ),
-                                        child: Icon(
-                                          category.type == 0
-                                              ? Icons.download
-                                              : Icons.upload,
-                                          color: category.type == 0
-                                              ? Colors.green
-                                              : Colors.red,
-                                        ),
+                                      child: Icon(
+                                        category.type == CategoryType.income
+                                            ? Icons.download
+                                            : Icons.upload,
+                                        color:
+                                            category.type == CategoryType.income
+                                            ? Colors.green
+                                            : Colors.red,
                                       ),
                                     ),
                                   ),
-                                );
-                              },
-                            ),
-                          );
-                        } else {
-                          return Expanded(child: Text('No categories yet'));
-                        }
-                      }()),
-                    ],
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      } else {
+                        return Expanded(child: Text('No categories yet'));
+                      }
+                    }()),
                   ],
-                ),
+                ],
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -327,7 +325,7 @@ class _CategoryPageState extends State<CategoryPage> {
                   } else {
                     pageContext.read<CategoryCubit>().addCategory(
                       text,
-                      _isSwitchOn == true ? 0 : 1,
+                      _isSwitchOn ? CategoryType.income : CategoryType.outcome,
                     );
                   }
                 }

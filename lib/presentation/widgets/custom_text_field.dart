@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CustomTextField extends StatelessWidget {
   final String? labelText;
@@ -6,6 +7,7 @@ class CustomTextField extends StatelessWidget {
   final TextEditingController? controller;
   final VoidCallback? onTap;
   final bool readOnly;
+  final List<TextInputFormatter>? inputFormatters;
   const CustomTextField({
     super.key,
     this.labelText,
@@ -13,6 +15,7 @@ class CustomTextField extends StatelessWidget {
     this.controller,
     this.readOnly = false,
     this.onTap,
+    this.inputFormatters,
   });
 
   @override
@@ -21,6 +24,7 @@ class CustomTextField extends StatelessWidget {
       readOnly: readOnly,
       controller: controller,
       keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
       onTap: onTap,
       decoration: InputDecoration(
         filled: true,

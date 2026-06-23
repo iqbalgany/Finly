@@ -1,10 +1,11 @@
+import 'package:finly/core/utils/extensions.dart';
 import 'package:flutter/material.dart';
 
 class FinancialStatusCard extends StatelessWidget {
   final IconData icon;
   final Color color;
   final String title;
-  final String amount;
+  final int amount;
   const FinancialStatusCard({
     super.key,
     required this.icon,
@@ -31,7 +32,7 @@ class FinancialStatusCard extends StatelessWidget {
           children: [
             Text(title, style: TextStyle(color: Colors.white, fontSize: 12)),
             SizedBox(height: 5),
-            Text(amount, style: TextStyle(color: Colors.white)),
+            Text(amount.toRupiah(), style: TextStyle(color: Colors.white)),
           ],
         ),
       ],

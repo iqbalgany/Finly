@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:finly/data/datasources/local/app_database.dart';
+import 'package:finly/data/models/category/category_model.dart';
 import 'package:finly/domain/entities/category/category_entity.dart';
 import 'package:finly/domain/repositories/category/category_repository.dart';
 
@@ -20,11 +21,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
       database.categories,
     )..where((tbl) => tbl.deletedAt.isNull())).get();
 
-    return result
-        .map(
-          (row) => CategoryEntity(name: row.name, type: row.type, id: row.id),
-        )
-        .toList();
+    return result.map((row) => row.toEntity()).toList();
   }
 
   @override
@@ -34,7 +31,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
         .insert(
           CategoriesCompanion.insert(
             name: category.name ?? '',
-            type: category.type ?? 0,
+            type: category.type!.value,
             createdAt: DateTime.now(),
             updatedAt: DateTime.now(),
           ),
@@ -49,7 +46,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
           Category(
             id: category.id!,
             name: category.name ?? '',
-            type: category.type ?? 0,
+            type: category.type!.value,
             createdAt: DateTime.now(),
             updatedAt: DateTime.now(),
           ),

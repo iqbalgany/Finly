@@ -8,7 +8,7 @@ class InsertCategoryUseCases {
 
   Future<void> call(CategoryEntity category) async {
     if (category.name!.isEmpty) {
-      throw Exception('Category name cannot be emptyClick to apply');
+      throw Exception('Category name cannot be empty');
     }
     return await repository.insertCategory(category);
   }

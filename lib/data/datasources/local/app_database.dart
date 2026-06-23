@@ -14,7 +14,7 @@ class AppDatabase extends _$AppDatabase {
 
   static QueryExecutor _openConnection() {
     return LazyDatabase(() async {
-      return driftDatabase(name: 'note_app');
+      return driftDatabase(name: 'finly_v2');
     });
   }
 }
