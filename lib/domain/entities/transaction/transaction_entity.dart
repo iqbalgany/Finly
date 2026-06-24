@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:equatable/equatable.dart';
 import 'package:finly/domain/entities/category/category_entity.dart';
 
@@ -30,4 +31,24 @@ class TransactionEntity extends Equatable {
     deletedAt,
     updatedAt,
   ];
+
+  TransactionEntity copyWith({
+    int? id,
+    CategoryEntity? category,
+    int? amount,
+    DateTime? transactionDate,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    DateTime? deletedAt,
+  }) {
+    return TransactionEntity(
+      id: id ?? this.id,
+      category: category ?? this.category,
+      amount: amount ?? this.amount,
+      transactionDate: transactionDate ?? this.transactionDate,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+    );
+  }
 }

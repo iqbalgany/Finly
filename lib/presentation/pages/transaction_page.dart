@@ -1,5 +1,5 @@
-import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:finly/domain/entities/category/category_entity.dart';
+import 'package:finly/domain/entities/transaction/transaction_entity.dart';
 import 'package:finly/domain/enums/category_type.dart';
 import 'package:finly/presentation/cubits/category/category_cubit.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +10,8 @@ import '../cubits/transaction/transaction_cubit.dart';
 import '../widgets/custom_text_field.dart';
 
 class TransactionPage extends StatefulWidget {
-  const TransactionPage({super.key});
+  final TransactionEntity? transaction;
+  const TransactionPage({this.transaction, super.key});
 
   @override
   State<TransactionPage> createState() => _TransactionPageState();
@@ -22,6 +23,8 @@ class _TransactionPageState extends State<TransactionPage> {
   final _amount = TextEditingController();
   final _category = TextEditingController();
   final _date = TextEditingController();
+
+  bool get _isEditMode => widget.transaction != null;
 
   CategoryEntity? _selectedCategory;
   DateTime? _rawSelectedDate;
@@ -43,17 +46,23 @@ class _TransactionPageState extends State<TransactionPage> {
     }
   }
 
-  final CurrencyTextInputFormatter _amountFormatter =
-      CurrencyTextInputFormatter.currency(
-        locale: 'id',
-        symbol: 'Rp ',
-        decimalDigits: 0,
-      );
-
   @override
   void initState() {
     super.initState();
     context.read<CategoryCubit>().getCategories();
+
+    if (_isEditMode) {
+      final tx = widget.transaction!;
+      _isSwitchOn = tx.category.type == CategoryType.income;
+      _amount.text = tx.amount.toString();
+      _selectedCategory = tx.category;
+      _category.text = tx.category.name ?? '';
+
+      _rawSelectedDate = tx.transactionDate;
+      if (_rawSelectedDate != null) {
+        _date.text = DateFormat('dd/MM/yyyy').format(_rawSelectedDate!);
+      }
+    }
   }
 
   @override
@@ -68,7 +77,10 @@ class _TransactionPageState extends State<TransactionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Transaction', style: TextStyle(color: Colors.white)),
+        title: Text(
+          _isEditMode ? 'Edit Transaction' : 'Add Transaction',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.orange,
         centerTitle: true,
         leading: IconButton(
@@ -182,11 +194,22 @@ class _TransactionPageState extends State<TransactionPage> {
                 if (_amount.text.isNotEmpty &&
                     _rawSelectedDate != null &&
                     _selectedCategory != null) {
-                  context.read<TransactionCubit>().addTransaction(
-                    category: _selectedCategory!,
-                    amount: int.parse(_amount.text.trim()),
-                    transactionDate: _rawSelectedDate!,
-                  );
+                  if (_isEditMode) {
+                    context.read<TransactionCubit>().updateTransaction(
+                      widget.transaction!.copyWith(
+                        id: widget.transaction!.id,
+                        amount: int.parse(_amount.text.trim()),
+                        category: _selectedCategory,
+                        transactionDate: _rawSelectedDate,
+                      ),
+                    );
+                  } else {
+                    context.read<TransactionCubit>().addTransaction(
+                      category: _selectedCategory!,
+                      amount: int.parse(_amount.text.trim()),
+                      transactionDate: _rawSelectedDate!,
+                    );
+                  }
 
                   _amount.clear();
                   _category.clear();
@@ -211,7 +234,7 @@ class _TransactionPageState extends State<TransactionPage> {
                 ),
               ),
               child: Text(
-                'Save',
+                _isEditMode ? 'Update' : 'Save',
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
