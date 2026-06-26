@@ -1,6 +1,8 @@
 import 'dart:developer';
 
 import 'package:calendar_appbar/calendar_appbar.dart';
+import 'package:finly/domain/entities/transaction/transaction_entity.dart';
+import 'package:finly/domain/enums/category_type.dart';
 import 'package:finly/presentation/cubits/transaction/transaction_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,10 +19,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  DateTime _selectDate = DateTime.now();
+
   @override
   void initState() {
     super.initState();
-
     context.read<TransactionCubit>().getTransactions();
   }
 
@@ -29,9 +32,35 @@ class _HomePageState extends State<HomePage> {
     return BlocConsumer<TransactionCubit, TransactionState>(
       listener: (context, state) {},
       builder: (context, state) {
+        int totalIncome = 0;
+        int totalOutcome = 0;
+        List<TransactionEntity> filteredTransactions = [];
+
+        if (state is TransactionSuccess) {
+          filteredTransactions = state.transactions!.where((tx) {
+            final txDate = tx.transactionDate;
+
+            return txDate.year == _selectDate.year &&
+                txDate.month == _selectDate.month &&
+                txDate.day == _selectDate.day;
+          }).toList();
+
+          totalIncome = state.transactions!
+              .where((tx) => tx.category.type == CategoryType.income)
+              .fold(0, (sum, tx) => sum + (tx.amount));
+
+          totalOutcome = state.transactions!
+              .where((tx) => tx.category.type == CategoryType.outcome)
+              .fold(0, (sum, tx) => sum + (tx.amount));
+        }
         return Scaffold(
           appBar: CalendarAppBar(
-            onDateChanged: (value) => log(value.toString()),
+            onDateChanged: (value) {
+              log(value.toString());
+              setState(() {
+                _selectDate = value;
+              });
+            },
             firstDate: DateTime.now().subtract(Duration(days: 140)),
             lastDate: DateTime.now(),
             backButton: false,
@@ -54,14 +83,14 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       FinancialStatusCard(
                         title: 'Income',
-                        amount: 3800000,
+                        amount: totalIncome,
                         color: Colors.green,
                         icon: Icons.download,
                       ),
 
                       FinancialStatusCard(
                         title: 'Outcome',
-                        amount: 1600000,
+                        amount: totalOutcome,
                         color: Colors.red,
                         icon: Icons.upload,
                       ),
@@ -104,12 +133,12 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ] else if (state is TransactionSuccess) ...[
-                  if (state.transactions!.isNotEmpty)
+                  if (filteredTransactions.isNotEmpty)
                     Expanded(
                       child: ListView.builder(
-                        itemCount: state.transactions!.length,
+                        itemCount: filteredTransactions.length,
                         itemBuilder: (context, index) {
-                          final transaction = state.transactions![index];
+                          final transaction = filteredTransactions[index];
                           return TransactionItemCard(transaction: transaction);
                         },
                       ),

@@ -4,7 +4,7 @@ extension CurrencyFormatter on num {
   String toRupiah() {
     return NumberFormat.currency(
       locale: 'id',
-      symbol: 'Rp ',
+      symbol: 'Rp',
       decimalDigits: 0,
     ).format(this);
   }
